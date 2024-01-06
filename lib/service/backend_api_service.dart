@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:talk_trainer/models/user_success_rate.dart';
 
 class BackendApiService {
@@ -7,13 +9,13 @@ class BackendApiService {
       BackendApiService._instantiate();
 
   Future<bool> sendAudioStreamAndReceivePauseOrder(
-      Stream<List<int>> audioStream) async {
+      Stream<Uint8List> audioStream) async {
     await Future.delayed(const Duration(seconds: 3));
     return true;
   }
 
   Future<UserSuccessRate> sendUserAudioStreamAndReceiveSuccessRate(
-      Stream<List<int>> audioStream) async {
+      Stream<Uint8List> audioStream) async {
     await Future.delayed(const Duration(seconds: 3));
     return UserSuccessRate(
       wordsAccuracy: 0.78,

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const MaterialColor primaryBackground = MaterialColor(_primaryBackgroundValue, <int, Color>{
+  static const MaterialColor primaryBackground =
+      MaterialColor(_primaryBackgroundValue, <int, Color>{
     50: Color(0xFFF9FCFC),
     100: Color(0xFFF0F7F6),
     200: Color(0xFFE6F2F1),
@@ -15,7 +16,8 @@ class AppColors {
   });
   static const int _primaryBackgroundValue = 0xFFCCE4E2;
 
-  static const MaterialColor primaryHighlight = MaterialColor(_primaryHighlightValue, <int, Color>{
+  static const MaterialColor primaryHighlight =
+      MaterialColor(_primaryHighlightValue, <int, Color>{
     50: Color(0xFFFCFDFD),
     100: Color(0xFFF8FBFB),
     200: Color(0xFFF3F9F9),
@@ -29,8 +31,8 @@ class AppColors {
   });
   static const int _primaryHighlightValue = 0xFFE6F2F2;
 
-
-  static const MaterialColor primaryShadow = MaterialColor(_primaryShadowValue, <int, Color>{
+  static const MaterialColor primaryShadow =
+      MaterialColor(_primaryShadowValue, <int, Color>{
     50: Color(0xFFF1F1F2),
     100: Color(0xFFDBDDDD),
     200: Color(0xFFC3C6C7),
@@ -44,9 +46,8 @@ class AppColors {
   });
   static const int _primaryShadowValue = 0xFF878D8F;
 
-
-
-  static const MaterialColor secondaryBackground = MaterialColor(_secondaryBackgroundValue, <int, Color>{
+  static const MaterialColor secondaryBackground =
+      MaterialColor(_secondaryBackgroundValue, <int, Color>{
     50: Color(0xFFFFFEFD),
     100: Color(0xFFFFFCFA),
     200: Color(0xFFFFFAF6),
@@ -60,7 +61,8 @@ class AppColors {
   });
   static const int _secondaryBackgroundValue = 0xFFFFF5ED;
 
-  static const MaterialColor secondaryMedium = MaterialColor(_secondaryMediumValue, <int, Color>{
+  static const MaterialColor secondaryMedium =
+      MaterialColor(_secondaryMediumValue, <int, Color>{
     50: Color(0xFFFCFAF7),
     100: Color(0xFFF7F2EB),
     200: Color(0xFFF2E9DD),
@@ -74,8 +76,8 @@ class AppColors {
   });
   static const int _secondaryMediumValue = 0xFFE5D3BB;
 
-
-  static const MaterialColor lightBackground = MaterialColor(_lightBackgroundValue, <int, Color>{
+  static const MaterialColor lightBackground =
+      MaterialColor(_lightBackgroundValue, <int, Color>{
     50: Color(0xFFFDFDFD),
     100: Color(0xFFFBFBFB),
     200: Color(0xFFF9F9F9),
@@ -89,7 +91,8 @@ class AppColors {
   });
   static const int _lightBackgroundValue = 0xFFF2F2F2;
 
-  static const MaterialColor white = MaterialColor(_whitePrimaryValue, <int, Color>{
+  static const MaterialColor white =
+      MaterialColor(_whitePrimaryValue, <int, Color>{
     50: Color(0xFFFFFFFF),
     100: Color(0xFFFFFFFF),
     200: Color(0xFFFFFFFF),
@@ -103,4 +106,8 @@ class AppColors {
   });
   static const int _whitePrimaryValue = 0xFFFFFFFF;
 
+  static const Color successRateChartBlue = Color.fromRGBO(75, 135, 185, 1);
+  static const Color successRateChartBrown = Color.fromRGBO(192, 108, 132, 1);
+  static const Color successRateChartPink = Color.fromRGBO(246, 114, 128, 1);
+  static const Color successRateChartOrange = Color.fromRGBO(248, 177, 149, 1);
 }

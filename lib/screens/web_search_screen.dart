@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:talk_trainer/widgets/search_results_widget.dart';
 import 'package:talk_trainer/widgets/search_field.dart';
 
 import '../models/search_response_model.dart';
@@ -36,27 +35,18 @@ class _WebSearchScreenState extends State<WebSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Expanded(
-          flex: 1,
-          child: SearchField(
-            searchController: _searchController,
-            onSubmitted: () {
-              setState(() {
-                _videos = YouTubeApiService.youTubeApiServiceInstance
-                    .fetchVideos(keywords: _searchController.text);
-              });
-            },
-            focusNode: _focusNode,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          flex: 2,
-          child: SearchResultsWidget(
-            videos: _videos,
-          ),
+        SearchField(
+          searchController: _searchController,
+          onSubmitted: () {
+            setState(() {
+              _videos = YouTubeApiService.youTubeApiServiceInstance
+                  .fetchVideos(keywords: _searchController.text);
+            });
+          },
+          focusNode: _focusNode,
         ),
       ],
     );

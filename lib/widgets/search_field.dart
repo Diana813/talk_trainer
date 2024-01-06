@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/app_colors.dart';
+
 class SearchField extends StatefulWidget {
   const SearchField({
     super.key,
@@ -40,7 +42,7 @@ class _SearchFieldState extends State<SearchField> {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Theme.of(context).highlightColor,
+        color: AppColors.primaryHighlight[600],
       ),
       padding: const EdgeInsets.all(8),
       child: TextField(
