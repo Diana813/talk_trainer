@@ -49,7 +49,7 @@ class SearchResultSnippet {
   String channelId;
   String title;
   String description;
-  Map<String, Thumbnail> thumbnails;
+  Thumbnails thumbnails;
   String channelTitle;
   String liveBroadcastContent;
 
@@ -69,10 +69,29 @@ class SearchResultSnippet {
       channelId: json['channelId'] ?? '',
       title: json['title'] ?? '',
       description: json['description'] ?? '',
-      thumbnails: Map.from(json['thumbnails'] ?? {})
-          .map((key, value) => MapEntry(key, Thumbnail.fromJson(value ?? {}))),
+      thumbnails: Thumbnails.fromJson(json['thumbnails'] ?? {}),
       channelTitle: json['channelTitle'] ?? '',
       liveBroadcastContent: json['liveBroadcastContent'] ?? '',
+    );
+  }
+}
+
+class Thumbnails {
+  Thumbnail defaultThumbnail;
+  Thumbnail mediumThumbnail;
+  Thumbnail highThumbnail;
+
+  Thumbnails({
+    required this.defaultThumbnail,
+    required this.mediumThumbnail,
+    required this.highThumbnail,
+  });
+
+  factory Thumbnails.fromJson(Map<String, dynamic> json) {
+    return Thumbnails(
+      defaultThumbnail: Thumbnail.fromJson(json['default'] ?? {}),
+      mediumThumbnail: Thumbnail.fromJson(json['medium'] ?? {}),
+      highThumbnail: Thumbnail.fromJson(json['high'] ?? {}),
     );
   }
 }

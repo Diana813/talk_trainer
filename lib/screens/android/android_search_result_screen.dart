@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:talk_trainer/models/search_response_model.dart';
 
-import '../service/youtube_api_service.dart';
-import '../widgets/search_results_widget.dart';
+import '../../service/youtube_api_service.dart';
+import '../../widgets/search_results_widget.dart';
 
 class AndroidSearchResultsScreen extends StatefulWidget {
   final String keywords;

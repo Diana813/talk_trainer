@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jumping_dot/jumping_dot.dart';
 
 import '../utils/app_colors.dart';
-import 'app_button.dart';
+import '../widgets/app_button.dart';
 
 class UserRecordingFragment extends StatelessWidget {
   final VoidCallback onPressed;

@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:talk_trainer/screens/android_welcome_screen.dart';
-import 'package:talk_trainer/screens/web_search_screen.dart';
+import 'package:talk_trainer/screens/android/android_welcome_screen.dart';
+import 'package:talk_trainer/screens/web/web_welcome_screen.dart';
 import 'package:talk_trainer/utils/app_colors.dart';
 
 void main() {
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: appName,
       theme: ThemeData(
-        scaffoldBackgroundColor: AppColors.lightBackground,
+        scaffoldBackgroundColor: kIsWeb ? AppColors.white : AppColors.lightBackground,
         highlightColor: AppColors.primaryHighlight,
         primaryColor: AppColors.lightBackground,
         primarySwatch: AppColors.white,
@@ -80,9 +80,9 @@ class _MyHomePageState extends State<MyHomePage> {
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   color: Theme.of(context).shadowColor,
                 )),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: kIsWeb ? AppColors.white : Theme.of(context).primaryColor,
       ),
-      body: kIsWeb ? WebSearchScreen() : const AndroidWelcomeScreen(),
+      body: kIsWeb ? const WebWelcomeScreen() : const AndroidWelcomeScreen(),
     );
   }
 }

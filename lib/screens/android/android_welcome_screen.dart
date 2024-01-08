@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:talk_trainer/screens/android_search_result_screen.dart';
+import 'package:talk_trainer/screens/android/android_search_result_screen.dart';
+import 'package:talk_trainer/widgets/welcome_text.dart';
 
-import '../widgets/search_field.dart';
+import '../../widgets/search_field.dart';
 
 class AndroidWelcomeScreen extends StatefulWidget {
   const AndroidWelcomeScreen({super.key});
@@ -61,30 +63,7 @@ class _AndroidWelcomeScreenState extends State<AndroidWelcomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (_visible)
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      Text(
-                        'Witaj w talk trainer!',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Rozwijaj swoje umiejętności językowe, ucząc się z ulubionych filmów na YouTube.',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      Text(
-                        'Wybierz podcast, wykład lub inne nagranie, które najbardziej Cię interesuje i po prostu powtarzaj po lektorze.',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            if (_visible) const Expanded(child: WelcomeText()),
             SearchField(
               searchController: _searchController,
               onSubmitted: () {

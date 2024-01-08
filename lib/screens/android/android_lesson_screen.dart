@@ -5,16 +5,12 @@ import 'package:just_audio/just_audio.dart';
 import 'package:talk_trainer/models/user_success_rate.dart';
 import 'package:talk_trainer/service/backend_api_service.dart';
 import 'package:talk_trainer/widgets/android_bottom_navigation_bar.dart';
-import 'package:talk_trainer/widgets/start_fragment.dart';
-import 'package:talk_trainer/widgets/user_recording_fragment.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'package:record/record.dart';
 
-import '../main.dart';
-import '../utils/audio_hepler.dart';
-import '../widgets/translation_pop_up.dart';
-import '../widgets/user_success_rate_fragment.dart';
-import '../widgets/youtube_player.dart';
+import '../../main.dart';
+import '../../utils/audio_helper.dart';
+import '../../fragments/lesson_fragment.dart';
 
 class AndroidLessonScreen extends StatefulWidget {
   final String result;
@@ -143,61 +139,29 @@ class _AndroidLessonScreenState extends State<AndroidLessonScreen> {
                 )),
         backgroundColor: Theme.of(context).primaryColor,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            flex: 2,
-            child: AppYouTubePlayer(
-                youtubePlayerController: _youtubePlayerController),
-          ),
-          Expanded(
-            flex: 3,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Visibility(
-                  visible: !_jumpingDotsVisible &&
-                      !_userSuccessRateVisualizationVisible,
-                  child: StartButtonFragment(
-                    isPlayClicked: _isPlayClicked,
-                    onPressed: () {
-                      if (_isPlayingAllowed) {
-                        setState(() {
-                          _userSuccessRateVisualizationVisible = false;
-                          _isPlayClicked = true;
-                        });
-                        recordAndStreamAudioToBackend();
-                      }
-                    },
-                  ),
-                ),
-                Visibility(
-                  visible: _jumpingDotsVisible,
-                  child: UserRecordingFragment(
-                    onPressed: () {
-                      setState(() {
-                        _recorder.stop();
-                        _jumpingDotsVisible = false;
-                        _userSuccessRateVisualizationVisible = true;
-                      });
-                    },
-                  ),
-                ),
-                Visibility(
-                    visible: _userSuccessRateVisualizationVisible,
-                    child: UserFeedbackFragment(
-                      userSuccessRate: _userSuccessRate,
-                      onPressedListen: () {},
-                      onPressedTranslate: () {
-                        showPopup(context);
-                      },
-                    )),
-              ],
-            ),
-          )
-        ],
+      body: LessonFragment(
+        youtubePlayerController: _youtubePlayerController,
+        jumpingDotsVisible: _jumpingDotsVisible,
+        userSuccessRateVisualizationVisible:
+            _userSuccessRateVisualizationVisible,
+        isPlayClicked: _isPlayClicked,
+        onStartPressed: () {
+          if (_isPlayingAllowed) {
+            setState(() {
+              _userSuccessRateVisualizationVisible = false;
+              _isPlayClicked = true;
+            });
+            recordAndStreamAudioToBackend();
+          }
+        },
+        onUserRecordingSubmitPressed: () {
+          setState(() {
+            _recorder.stop();
+            _jumpingDotsVisible = false;
+            _userSuccessRateVisualizationVisible = true;
+          });
+        },
+        userSuccessRate: _userSuccessRate,
       ),
       bottomNavigationBar: AndroidBottomNavigationBar(
         onTap: (int index) async {

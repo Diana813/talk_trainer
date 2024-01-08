@@ -7,14 +7,14 @@ class SearchField extends StatefulWidget {
     super.key,
     required TextEditingController searchController,
     required VoidCallback onSubmitted,
-    required FocusNode focusNode,
+    FocusNode? focusNode,
   })  : _searchController = searchController,
         _onSubmitted = onSubmitted,
         _focusNode = focusNode;
 
   final TextEditingController _searchController;
   final VoidCallback _onSubmitted;
-  final FocusNode _focusNode;
+  final FocusNode? _focusNode;
 
   @override
   State<SearchField> createState() => _SearchFieldState();
@@ -22,6 +22,7 @@ class SearchField extends StatefulWidget {
 
 class _SearchFieldState extends State<SearchField> {
   late bool _isSearchEmpty;
+
   @override
   void initState() {
     super.initState();
@@ -35,41 +36,45 @@ class _SearchFieldState extends State<SearchField> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: AppColors.primaryHighlight[600],
-      ),
-      padding: const EdgeInsets.all(8),
-      child: TextField(
-        cursorColor: Theme.of(context).shadowColor,
-        controller: widget._searchController,
-        decoration: InputDecoration(
-          focusColor: Theme.of(context).shadowColor,
-          fillColor: Theme.of(context).primaryColorDark,
-          hoverColor: Theme.of(context).primaryColor,
-          labelText: 'Wyszukaj nagranie na YouTube',
-          labelStyle: Theme.of(context).textTheme.bodyMedium,
-          suffixIcon: GestureDetector(
-            onTap: () {
-              if (!_isSearchEmpty) {
-                widget._searchController.clear();
-              }
-            },
-            child: Icon(
-              _isSearchEmpty ? Icons.youtube_searched_for_rounded : Icons.close,
-              color: Colors.red[700],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: AppColors.primaryHighlight[600],
+        ),
+        padding: const EdgeInsets.all(8),
+        child: TextField(
+          cursorColor: Theme.of(context).shadowColor,
+          controller: widget._searchController,
+          decoration: InputDecoration(
+            focusColor: Theme.of(context).shadowColor,
+            fillColor: Theme.of(context).primaryColorDark,
+            hoverColor: Theme.of(context).primaryColor,
+            labelText: 'Wyszukaj nagranie na YouTube',
+            labelStyle: Theme.of(context).textTheme.bodyMedium,
+            suffixIcon: GestureDetector(
+              onTap: () {
+                if (!_isSearchEmpty) {
+                  widget._searchController.clear();
+                }
+              },
+              child: Icon(
+                _isSearchEmpty
+                    ? Icons.youtube_searched_for_rounded
+                    : Icons.close,
+                color: Colors.red[700],
+              ),
             ),
           ),
+          onSubmitted: (value) {
+            widget._onSubmitted();
+          },
+          focusNode: widget._focusNode,
         ),
-        onSubmitted: (value) {
-          widget._onSubmitted();
-        },
-        focusNode: widget._focusNode,
       ),
     );
   }

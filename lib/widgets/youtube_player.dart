@@ -10,8 +10,8 @@ class AppYouTubePlayer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 12,
+        horizontal: 16,
+        vertical: 16,
       ),
       child: YoutubePlayer(
         controller: youtubePlayerController,
