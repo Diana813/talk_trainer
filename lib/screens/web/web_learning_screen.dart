@@ -159,7 +159,7 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
               child: Container(),
             ),
             Expanded(
-              flex: 5,
+              flex: 10,
               child: LessonFragment(
                 youtubePlayerController: _youtubePlayerController,
                 jumpingDotsVisible: _jumpingDotsVisible,
@@ -185,7 +185,7 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
                 userSuccessRate: _userSuccessRate,
               ),
             ),
-            Expanded(flex: 3, child: SearchResultsWidget(videos: _videos)),
+            Expanded(flex: 5, child: SearchResultsWidget(videos: _videos)),
           ]),
     );
   }

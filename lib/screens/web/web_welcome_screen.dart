@@ -43,7 +43,7 @@ class _WebWelcomeScreenState extends State<WebWelcomeScreen> {
         Expanded(
           flex: 4,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               const Padding(
                 padding: EdgeInsets.all(16.0),
@@ -82,7 +82,8 @@ class _WebWelcomeScreenState extends State<WebWelcomeScreen> {
                       return GridView.builder(
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4),
+                          crossAxisCount: 4,
+                        ),
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: snapshot.data!.length,
                         itemBuilder: (BuildContext context, int index) {

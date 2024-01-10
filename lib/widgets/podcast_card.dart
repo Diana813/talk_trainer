@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../utils/app_colors.dart';
-
 class PodcastCard extends StatelessWidget {
   final String thumbnail;
   final String title;
@@ -16,14 +14,8 @@ class PodcastCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Card(
-        color: AppColors.white,
-        surfaceTintColor: AppColors.white,
-        shadowColor: AppColors.primaryShadow,
-        elevation: 2,
-        child: Image.network(thumbnail),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Image.network(thumbnail),
     );
   }
 }
