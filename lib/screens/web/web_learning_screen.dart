@@ -1,15 +1,10 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:record/record.dart';
 import 'package:talk_trainer/models/search_response_model.dart';
 import 'package:talk_trainer/utils/app_colors.dart';
 import 'package:talk_trainer/utils/youtube_search_dummy_data.dart';
 import 'package:talk_trainer/fragments/lesson_fragment.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
-import '../../main.dart';
 import '../../models/user_success_rate.dart';
 import '../../service/backend_api_service.dart';
 import '../../service/youtube_api_service.dart';
@@ -28,13 +23,12 @@ class WebLearningScreen extends StatefulWidget {
 class _WebLearningScreenState extends State<WebLearningScreen> {
   late Future<List<SearchResult>> _videos;
   late final YoutubePlayerController _youtubePlayerController;
-  final _recorder = AudioRecorder();
-  late bool _jumpingDotsVisible;
-  late bool _userSuccessRateVisualizationVisible;
-  late Stream<Uint8List> _userAudioStream;
-  bool _isPlayingAllowed = true;
-  late Stream<Uint8List> _videoStream;
-  final AudioPlayer _player = AudioPlayer();
+  late AudioHelper _audioHelper;
+
+  bool _isPlayClicked = false;
+  bool _isRecording = false;
+  bool _isPlaying = false;
+
   UserSuccessRate _userSuccessRate = UserSuccessRate(
     wordsAccuracy: 0,
     accentAccuracy: 0,
@@ -42,10 +36,10 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
     pronunciationAccuracy: 0,
   );
 
-  bool _isPlayClicked = false;
-
   @override
   void initState() {
+    _audioHelper = AudioHelper();
+
     _youtubePlayerController = YoutubePlayerController(
       params: const YoutubePlayerParams(
         enableCaption: false,
@@ -63,81 +57,63 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
             videoId: value.first.id.videoId))
         .then((value) => _youtubePlayerController.stopVideo());
 
-    _jumpingDotsVisible = false;
-    _userSuccessRateVisualizationVisible = false;
     super.initState();
   }
 
   @override
   void dispose() {
     _youtubePlayerController.close();
-    _recorder.dispose();
-    _player.dispose();
+    _audioHelper.dispose();
     super.dispose();
   }
 
   Future<void> recordAndStreamAudioToBackend() async {
-    if (await _recorder.hasPermission()) {
+    setState(() {
+      _isRecording = true;
+    });
+    _audioHelper.record();
+    _youtubePlayerController.playVideo();
+
+    //todo stream to backend
+    bool pauseOrder = await BackendApiService.backendApiServiceInstance
+        .sendAudioStreamAndReceivePauseOrder();
+
+    if (pauseOrder) {
+      _youtubePlayerController.pauseVideo();
+      _audioHelper.stopRecording();
       setState(() {
-        _isPlayingAllowed = false;
+        _isRecording = false;
       });
 
-      _videoStream = await _recorder
-          .startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
-      _youtubePlayerController.playVideo();
-      bool pauseOrder = await BackendApiService.backendApiServiceInstance
-          .sendAudioStreamAndReceivePauseOrder(_videoStream);
-
-      if (pauseOrder) {
-        _youtubePlayerController.pauseVideo();
-        _recorder.pause();
-        setState(() {
-          _jumpingDotsVisible = true;
-        });
-
-        recordUserAudio();
-      }
+      recordUserAudio();
     }
   }
 
   Future<void> recordReplayAndStreamAudioToBackend() async {
-    if (await _recorder.hasPermission()) {
-      setState(() {
-        _isPlayingAllowed = false;
-      });
+    setState(() {
+      _isRecording = true;
+    });
+    _audioHelper.record();
 
-      await _player.setAudioSource(MyCustomSource(_videoStream));
-      _player.play();
+    setState(() {
+      _isPlaying = true;
+    });
+    _audioHelper.play();
 
-      _player.playerStateStream.listen((state) {
-        if (state.processingState == ProcessingState.completed) {
-          setState(() {
-            _jumpingDotsVisible = true;
-          });
-
-          recordUserAudio();
-        }
-      });
+    if (_isPlaying == false) {
+      recordUserAudio();
     }
   }
 
   Future<void> recordUserAudio() async {
-    _userAudioStream = await _recorder
-        .startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
-    _userSuccessRate = await BackendApiService.backendApiServiceInstance
-        .sendUserAudioStreamAndReceiveSuccessRate(_userAudioStream);
     setState(() {
-      _isPlayingAllowed = true;
+      _isRecording = true;
     });
-  }
+    _audioHelper.record();
 
-  void goToHomeScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const MyHomePage(title: 'talk trainer'),
-      ),
-    );
+    //todo send to backend
+    _userSuccessRate = await BackendApiService.backendApiServiceInstance
+        .sendUserAudioStreamAndReceiveSuccessRate();
   }
 
   @override
@@ -162,27 +138,28 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
               flex: 10,
               child: LessonFragment(
                 youtubePlayerController: _youtubePlayerController,
-                jumpingDotsVisible: _jumpingDotsVisible,
+                jumpingDotsVisible: _isRecording,
                 userSuccessRateVisualizationVisible:
-                    _userSuccessRateVisualizationVisible,
+                    _isPlayClicked && !_isRecording && !_isPlaying,
                 isPlayClicked: _isPlayClicked,
                 onStartPressed: () {
-                  if (_isPlayingAllowed) {
+                  if (!_isRecording && !_isPlaying) {
                     setState(() {
-                      _userSuccessRateVisualizationVisible = false;
                       _isPlayClicked = true;
                     });
                     recordAndStreamAudioToBackend();
                   }
                 },
                 onUserRecordingSubmitPressed: () {
+                  _audioHelper.stopRecording();
                   setState(() {
-                    _recorder.stop();
-                    _jumpingDotsVisible = false;
-                    _userSuccessRateVisualizationVisible = true;
+                    _isRecording = false;
                   });
                 },
                 userSuccessRate: _userSuccessRate,
+                onListenPressed: () {
+                  _audioHelper.play();
+                },
               ),
             ),
             Expanded(flex: 5, child: SearchResultsWidget(videos: _videos)),

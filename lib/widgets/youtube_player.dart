@@ -8,14 +8,25 @@ class AppYouTubePlayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: 16,
+    return Stack(children: [
+      Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: 16,
+              ),
+              child: YoutubePlayer(
+                controller: youtubePlayerController,
+              ),
+            ),
+          ),
+        ],
       ),
-      child: YoutubePlayer(
-        controller: youtubePlayerController,
-        aspectRatio: 16 / 9,
-      ),
-    );
+      Container(
+        color: Colors.transparent,
+      )
+    ]);
   }
 }

@@ -8,15 +8,13 @@ class BackendApiService {
   static final BackendApiService backendApiServiceInstance =
       BackendApiService._instantiate();
 
-  Future<bool> sendAudioStreamAndReceivePauseOrder(
-      Stream<Uint8List> audioStream) async {
-    await Future.delayed(const Duration(seconds: 3));
+  Future<bool> sendAudioStreamAndReceivePauseOrder() async {
+    await Future.delayed(const Duration(seconds: 5));
     return true;
   }
 
-  Future<UserSuccessRate> sendUserAudioStreamAndReceiveSuccessRate(
-      Stream<Uint8List> audioStream) async {
-    await Future.delayed(const Duration(seconds: 3));
+  Future<UserSuccessRate> sendUserAudioStreamAndReceiveSuccessRate() async {
+    await Future.delayed(const Duration(seconds: 5));
     return UserSuccessRate(
       wordsAccuracy: 0.78,
       accentAccuracy: 0.59,

@@ -1,16 +1,14 @@
-import 'dart:typed_data';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:talk_trainer/models/user_success_rate.dart';
 import 'package:talk_trainer/service/backend_api_service.dart';
 import 'package:talk_trainer/widgets/android_bottom_navigation_bar.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
-import 'package:record/record.dart';
 
 import '../../main.dart';
-import '../../utils/audio_helper.dart';
 import '../../fragments/lesson_fragment.dart';
+import '../../utils/audio_helper.dart';
 
 class AndroidLessonScreen extends StatefulWidget {
   final String result;
@@ -23,13 +21,18 @@ class AndroidLessonScreen extends StatefulWidget {
 
 class _AndroidLessonScreenState extends State<AndroidLessonScreen> {
   late final YoutubePlayerController _youtubePlayerController;
-  final _recorder = AudioRecorder();
-  late bool _jumpingDotsVisible;
-  late bool _userSuccessRateVisualizationVisible;
-  late Stream<Uint8List> _userAudioStream;
-  bool _isPlayingAllowed = true;
-  late Stream<Uint8List> _videoStream;
-  final AudioPlayer _player = AudioPlayer();
+  late AudioHelper _audioHelper;
+
+  bool _isPlayClicked = false;
+  bool _isRecording = false;
+  bool _isPlaying = false;
+  bool _isPaused = false;
+
+  int _startVideo = 0;
+  int _stopVideo = 0;
+
+  int _selectedIndex = 0;
+
   UserSuccessRate _userSuccessRate = UserSuccessRate(
     wordsAccuracy: 0,
     accentAccuracy: 0,
@@ -37,10 +40,10 @@ class _AndroidLessonScreenState extends State<AndroidLessonScreen> {
     pronunciationAccuracy: 0,
   );
 
-  bool _isPlayClicked = false;
-
   @override
   void initState() {
+    _audioHelper = AudioHelper();
+
     _youtubePlayerController = YoutubePlayerController.fromVideoId(
       videoId: widget.result,
       autoPlay: false,
@@ -50,74 +53,93 @@ class _AndroidLessonScreenState extends State<AndroidLessonScreen> {
       ),
     );
 
-    _jumpingDotsVisible = false;
-    _userSuccessRateVisualizationVisible = false;
+    monitorTimestamps();
+
     super.initState();
   }
 
   @override
   void dispose() {
     _youtubePlayerController.close();
-    _recorder.dispose();
-    _player.dispose();
+    _audioHelper.dispose();
     super.dispose();
   }
 
-  int _selectedIndex = 0;
+  void monitorTimestamps() {
+    _youtubePlayerController.listen((event) async {
+      if (event.playerState == PlayerState.paused ||
+          event.playerState == PlayerState.ended) {
+        double stopInSeconds = await _youtubePlayerController.currentTime;
+
+        setState(() {
+          _stopVideo = (stopInSeconds * 1000).ceil();
+          print('stopVideo: $_stopVideo');
+        });
+      }
+    });
+  }
 
   Future<void> recordAndStreamAudioToBackend() async {
-    if (await _recorder.hasPermission()) {
+    await _audioHelper.record();
+    await _youtubePlayerController.playVideo();
+    double startInSeconds = await _youtubePlayerController.currentTime;
+
+    setState(() {
+      _startVideo = (startInSeconds * 1000).ceil();
+      print('startVideo: $_startVideo');
+      _isRecording = true;
+      _isPlaying = true;
+      _isPaused = false;
+    });
+
+    //todo stream to backend
+    bool pauseOrder = await BackendApiService.backendApiServiceInstance
+        .sendAudioStreamAndReceivePauseOrder();
+
+    if (pauseOrder) {
+      await _audioHelper.stopRecording();
+      await _youtubePlayerController.pauseVideo();
       setState(() {
-        _isPlayingAllowed = false;
+        _isRecording = false;
+        _isPlaying = false;
+        _isPaused = true;
       });
 
-      _videoStream = await _recorder
-          .startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
-      _youtubePlayerController.playVideo();
-      bool pauseOrder = await BackendApiService.backendApiServiceInstance
-          .sendAudioStreamAndReceivePauseOrder(_videoStream);
-
-      if (pauseOrder) {
-        _youtubePlayerController.pauseVideo();
-        _recorder.pause();
-        setState(() {
-          _jumpingDotsVisible = true;
-        });
-
-        recordUserAudio();
-      }
+      recordUserAudio();
     }
   }
 
   Future<void> recordReplayAndStreamAudioToBackend() async {
-    if (await _recorder.hasPermission()) {
-      setState(() {
-        _isPlayingAllowed = false;
-      });
+    await _youtubePlayerController.seekTo(seconds: _startVideo / 1000, allowSeekAhead: true);
 
-      await _player.setAudioSource(MyCustomSource(_videoStream));
-      _player.play();
+    await _youtubePlayerController.playVideo();
+    print('start v: $_startVideo');
+    print('current start time: ${await _youtubePlayerController.currentTime}');
+    setState(() {
+      _isPlaying = true;
+    });
 
-      _player.playerStateStream.listen((state) {
-        if (state.processingState == ProcessingState.completed) {
-          setState(() {
-            _jumpingDotsVisible = true;
-          });
+    print('duration: ${_stopVideo - _startVideo}');
+    await Future.delayed(Duration(milliseconds: _stopVideo - _startVideo));
 
-          recordUserAudio();
-        }
-      });
-    }
+    await _youtubePlayerController.pauseVideo();
+    setState(() {
+      _isPlaying = false;
+    });
+    recordUserAudio();
   }
 
   Future<void> recordUserAudio() async {
-    _userAudioStream = await _recorder
-        .startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
-    _userSuccessRate = await BackendApiService.backendApiServiceInstance
-        .sendUserAudioStreamAndReceiveSuccessRate(_userAudioStream);
+    _audioHelper.record();
     setState(() {
-      _isPlayingAllowed = true;
+      _isRecording = true;
     });
+
+    //todo send to backend
+    _userSuccessRate = await BackendApiService.backendApiServiceInstance
+        .sendUserAudioStreamAndReceiveSuccessRate();
+
+    setState(() {});
   }
 
   void goToHomeScreen() {
@@ -134,34 +156,42 @@ class _AndroidLessonScreenState extends State<AndroidLessonScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('talk trainer',
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: Theme.of(context).shadowColor,
-                )),
-        backgroundColor: Theme.of(context).primaryColor,
+            style: Theme
+                .of(context)
+                .textTheme
+                .titleLarge!
+                .copyWith(
+              color: Theme
+                  .of(context)
+                  .shadowColor,
+            )),
+        backgroundColor: Theme
+            .of(context)
+            .primaryColor,
       ),
       body: LessonFragment(
         youtubePlayerController: _youtubePlayerController,
-        jumpingDotsVisible: _jumpingDotsVisible,
-        userSuccessRateVisualizationVisible:
-            _userSuccessRateVisualizationVisible,
+        jumpingDotsVisible: _isPaused && _isRecording,
+        userSuccessRateVisualizationVisible: !_isRecording && _isPaused,
         isPlayClicked: _isPlayClicked,
         onStartPressed: () {
-          if (_isPlayingAllowed) {
+          if (!_isRecording && !_isPlaying && !_isPlayClicked) {
             setState(() {
-              _userSuccessRateVisualizationVisible = false;
               _isPlayClicked = true;
             });
             recordAndStreamAudioToBackend();
           }
         },
         onUserRecordingSubmitPressed: () {
+          _audioHelper.stopRecording();
           setState(() {
-            _recorder.stop();
-            _jumpingDotsVisible = false;
-            _userSuccessRateVisualizationVisible = true;
+            _isRecording = false;
           });
         },
         userSuccessRate: _userSuccessRate,
+        onListenPressed: () {
+          _audioHelper.play();
+        },
       ),
       bottomNavigationBar: AndroidBottomNavigationBar(
         onTap: (int index) async {
@@ -174,19 +204,16 @@ class _AndroidLessonScreenState extends State<AndroidLessonScreen> {
           }
 
           if (index == 1) {
-            if (_isPlayingAllowed) {
+            if (!_isRecording && !_isPlaying) {
               setState(() {
-                _userSuccessRateVisualizationVisible = false;
+                _isPlayClicked = true;
               });
               recordAndStreamAudioToBackend();
             }
           }
 
           if (index == 2) {
-            if (_isPlayingAllowed) {
-              setState(() {
-                _userSuccessRateVisualizationVisible = false;
-              });
+            if (!_isRecording && !_isPlaying) {
               recordReplayAndStreamAudioToBackend();
             }
           }

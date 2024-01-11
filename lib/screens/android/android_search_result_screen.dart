@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:talk_trainer/models/search_response_model.dart';
 
 import '../../service/youtube_api_service.dart';
+import '../../utils/youtube_search_dummy_data.dart';
 import '../../widgets/search_results_widget.dart';
 
 class AndroidSearchResultsScreen extends StatefulWidget {
@@ -22,7 +23,9 @@ class _AndroidSearchResultsScreenState
   void initState() {
     super.initState();
     _videos = YouTubeApiService.youTubeApiServiceInstance
-        .fetchVideos(keywords: widget.keywords);
+        .fetchDummyData(dummySearchResultsLearningScreenData);
+
+        //YouTubeApiService.youTubeApiServiceInstance.fetchVideos(keywords: widget.keywords);
   }
 
   @override

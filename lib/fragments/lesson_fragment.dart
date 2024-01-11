@@ -18,6 +18,7 @@ class LessonFragment extends StatelessWidget {
   final bool isPlayClicked;
   final VoidCallback onStartPressed;
   final VoidCallback onUserRecordingSubmitPressed;
+  final VoidCallback onListenPressed;
   final UserSuccessRate userSuccessRate;
 
   const LessonFragment(
@@ -28,7 +29,8 @@ class LessonFragment extends StatelessWidget {
       required this.isPlayClicked,
       required this.onStartPressed,
       required this.onUserRecordingSubmitPressed,
-      required this.userSuccessRate});
+      required this.userSuccessRate,
+      required this.onListenPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +66,7 @@ class LessonFragment extends StatelessWidget {
                   visible: userSuccessRateVisualizationVisible,
                   child: UserFeedbackFragment(
                     userSuccessRate: userSuccessRate,
-                    onPressedListen: () {},
+                    onPressedListen: onListenPressed,
                     onPressedTranslate: () {
                       showPopup(context);
                     },
@@ -86,18 +88,22 @@ class LessonFragment extends StatelessWidget {
                       onPressed: () {
                         showPopup(context);
                       },
-                      child: const Icon(Icons.translate_rounded, color: Colors.red,),
+                      child: const Icon(
+                        Icons.translate_rounded,
+                        color: Colors.red,
+                      ),
                     ),
                     AppIconButton(
                       backgroundColorDefault: AppColors.lightBackground[700]!,
                       backgroundColorPressed: AppColors.primaryShadow[200]!,
-                      onPressed: () {},
-                      child: const Icon(Icons.headset_rounded, color: Colors.red),
+                      onPressed: onListenPressed,
+                      child:
+                          const Icon(Icons.headset_rounded, color: Colors.red),
                     ),
                     AppIconButton(
                       backgroundColorDefault: AppColors.lightBackground[700]!,
                       backgroundColorPressed: AppColors.primaryShadow[200]!,
-                      onPressed: () {},
+                      onPressed: onStartPressed,
                       child: const Icon(Icons.play_arrow, color: Colors.red),
                     ),
                     AppIconButton(
