@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:talk_trainer/fragments/web_bottom_navigation.dart';
 import 'package:talk_trainer/models/search_response_model.dart';
 import 'package:talk_trainer/utils/app_colors.dart';
 import 'package:talk_trainer/utils/youtube_search_dummy_data.dart';
@@ -28,6 +29,10 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
   bool _isPlayClicked = false;
   bool _isRecording = false;
   bool _isPlaying = false;
+  bool _isPaused = false;
+
+  int _startVideo = 0;
+  int _stopVideo = 0;
 
   UserSuccessRate _userSuccessRate = UserSuccessRate(
     wordsAccuracy: 0,
@@ -57,6 +62,7 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
             videoId: value.first.id.videoId))
         .then((value) => _youtubePlayerController.stopVideo());
 
+    monitorTimestamps();
     super.initState();
   }
 
@@ -67,22 +73,42 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
     super.dispose();
   }
 
-  Future<void> recordAndStreamAudioToBackend() async {
-    setState(() {
-      _isRecording = true;
+  void monitorTimestamps() {
+    _youtubePlayerController.listen((event) async {
+      if (event.playerState == PlayerState.paused ||
+          event.playerState == PlayerState.ended) {
+        double stopInSeconds = await _youtubePlayerController.currentTime;
+
+        setState(() {
+          _stopVideo = (stopInSeconds * 1000).ceil();
+        });
+      }
     });
-    _audioHelper.record();
-    _youtubePlayerController.playVideo();
+  }
+
+  Future<void> recordAndStreamAudioToBackend() async {
+    await _audioHelper.record();
+    await _youtubePlayerController.playVideo();
+    double startInSeconds = await _youtubePlayerController.currentTime;
+
+    setState(() {
+      _startVideo = (startInSeconds * 1000).ceil();
+      _isRecording = true;
+      _isPlaying = true;
+      _isPaused = false;
+    });
 
     //todo stream to backend
     bool pauseOrder = await BackendApiService.backendApiServiceInstance
         .sendAudioStreamAndReceivePauseOrder();
 
     if (pauseOrder) {
-      _youtubePlayerController.pauseVideo();
-      _audioHelper.stopRecording();
+      await _audioHelper.stopRecording();
+      await _youtubePlayerController.pauseVideo();
       setState(() {
         _isRecording = false;
+        _isPlaying = false;
+        _isPaused = true;
       });
 
       recordUserAudio();
@@ -90,30 +116,34 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
   }
 
   Future<void> recordReplayAndStreamAudioToBackend() async {
-    setState(() {
-      _isRecording = true;
-    });
-    _audioHelper.record();
+    await _youtubePlayerController.seekTo(
+        seconds: _startVideo / 1000, allowSeekAhead: true);
 
+    await _youtubePlayerController.playVideo();
     setState(() {
       _isPlaying = true;
     });
-    _audioHelper.play();
 
-    if (_isPlaying == false) {
-      recordUserAudio();
-    }
+    await Future.delayed(Duration(milliseconds: _stopVideo - _startVideo));
+
+    await _youtubePlayerController.pauseVideo();
+    setState(() {
+      _isPlaying = false;
+    });
+    recordUserAudio();
   }
 
   Future<void> recordUserAudio() async {
+    _audioHelper.record();
     setState(() {
       _isRecording = true;
     });
-    _audioHelper.record();
 
     //todo send to backend
     _userSuccessRate = await BackendApiService.backendApiServiceInstance
         .sendUserAudioStreamAndReceiveSuccessRate();
+
+    setState(() {});
   }
 
   @override
@@ -136,30 +166,57 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
             ),
             Expanded(
               flex: 10,
-              child: LessonFragment(
-                youtubePlayerController: _youtubePlayerController,
-                jumpingDotsVisible: _isRecording,
-                userSuccessRateVisualizationVisible:
-                    _isPlayClicked && !_isRecording && !_isPlaying,
-                isPlayClicked: _isPlayClicked,
-                onStartPressed: () {
-                  if (!_isRecording && !_isPlaying) {
-                    setState(() {
-                      _isPlayClicked = true;
-                    });
-                    recordAndStreamAudioToBackend();
-                  }
-                },
-                onUserRecordingSubmitPressed: () {
-                  _audioHelper.stopRecording();
-                  setState(() {
-                    _isRecording = false;
-                  });
-                },
-                userSuccessRate: _userSuccessRate,
-                onListenPressed: () {
-                  _audioHelper.play();
-                },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: LessonFragment(
+                      youtubePlayerController: _youtubePlayerController,
+                      jumpingDotsVisible: _isPaused && _isRecording,
+                      userSuccessRateVisualizationVisible:
+                          !_isRecording && _isPaused,
+                      isPlayClicked: _isPlayClicked,
+                      onStartPressed: () {
+                        if (!_isRecording && !_isPlaying && !_isPlayClicked) {
+                          setState(() {
+                            _isPlayClicked = true;
+                          });
+                          recordAndStreamAudioToBackend();
+                        }
+                      },
+                      onUserRecordingSubmitPressed: () {
+                        _audioHelper.stopRecording();
+                        setState(() {
+                          _isRecording = false;
+                        });
+                      },
+                      userSuccessRate: _userSuccessRate,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: WebBottomNavigationFragment(
+                      onListenPressed: () {
+                        _audioHelper.play();
+                      },
+                      onStartPressed: () {
+                        if (!_isRecording && !_isPlaying) {
+                          setState(() {
+                            _isPlayClicked = true;
+                          });
+                          recordAndStreamAudioToBackend();
+                        }
+                      },
+                      onReplyPressed: () {
+                        if (!_isRecording && !_isPlaying) {
+                          recordReplayAndStreamAudioToBackend();
+                        }
+                      },
+                    ),
+                  )
+                ],
               ),
             ),
             Expanded(flex: 5, child: SearchResultsWidget(videos: _videos)),

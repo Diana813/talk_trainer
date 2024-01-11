@@ -110,7 +110,8 @@ class _AndroidLessonScreenState extends State<AndroidLessonScreen> {
   }
 
   Future<void> recordReplayAndStreamAudioToBackend() async {
-    await _youtubePlayerController.seekTo(seconds: _startVideo / 1000, allowSeekAhead: true);
+    await _youtubePlayerController.seekTo(
+        seconds: _startVideo / 1000, allowSeekAhead: true);
 
     await _youtubePlayerController.playVideo();
     print('start v: $_startVideo');
@@ -156,18 +157,10 @@ class _AndroidLessonScreenState extends State<AndroidLessonScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('talk trainer',
-            style: Theme
-                .of(context)
-                .textTheme
-                .titleLarge!
-                .copyWith(
-              color: Theme
-                  .of(context)
-                  .shadowColor,
-            )),
-        backgroundColor: Theme
-            .of(context)
-            .primaryColor,
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  color: Theme.of(context).shadowColor,
+                )),
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body: LessonFragment(
         youtubePlayerController: _youtubePlayerController,

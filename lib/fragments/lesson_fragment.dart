@@ -8,9 +8,6 @@ import 'package:talk_trainer/fragments/user_success_rate_fragment.dart';
 import 'package:talk_trainer/widgets/youtube_player.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
-import '../utils/app_colors.dart';
-import '../widgets/icon_button.dart';
-
 class LessonFragment extends StatelessWidget {
   final YoutubePlayerController youtubePlayerController;
   final bool jumpingDotsVisible;
@@ -18,7 +15,7 @@ class LessonFragment extends StatelessWidget {
   final bool isPlayClicked;
   final VoidCallback onStartPressed;
   final VoidCallback onUserRecordingSubmitPressed;
-  final VoidCallback onListenPressed;
+  final VoidCallback? onListenPressed;
   final UserSuccessRate userSuccessRate;
 
   const LessonFragment(
@@ -30,13 +27,35 @@ class LessonFragment extends StatelessWidget {
       required this.onStartPressed,
       required this.onUserRecordingSubmitPressed,
       required this.userSuccessRate,
-      required this.onListenPressed});
+      this.onListenPressed});
+
+  Widget _returnRelevantWidget(BuildContext context) {
+    if (jumpingDotsVisible) {
+      return UserRecordingFragment(
+        onPressed: onUserRecordingSubmitPressed,
+      );
+    } else if (userSuccessRateVisualizationVisible) {
+      return UserFeedbackFragment(
+        userSuccessRate: userSuccessRate,
+        onPressedListen: onListenPressed,
+        onPressedTranslate: () {
+          showPopup(context);
+        },
+      );
+    } else {
+      return StartButtonFragment(
+        isPlayClicked: isPlayClicked,
+        onPressed: onStartPressed,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.max,
       children: [
         Expanded(
           flex: 2,
@@ -45,75 +64,11 @@ class LessonFragment extends StatelessWidget {
         ),
         Expanded(
           flex: 3,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Visibility(
-                visible:
-                    !jumpingDotsVisible && !userSuccessRateVisualizationVisible,
-                child: StartButtonFragment(
-                  isPlayClicked: isPlayClicked,
-                  onPressed: onStartPressed,
-                ),
-              ),
-              Visibility(
-                visible: jumpingDotsVisible,
-                child: UserRecordingFragment(
-                  onPressed: onUserRecordingSubmitPressed,
-                ),
-              ),
-              Visibility(
-                  visible: userSuccessRateVisualizationVisible,
-                  child: UserFeedbackFragment(
-                    userSuccessRate: userSuccessRate,
-                    onPressedListen: onListenPressed,
-                    onPressedTranslate: () {
-                      showPopup(context);
-                    },
-                  )),
-            ],
+          child: Container(
+            alignment: Alignment.center,
+            child: _returnRelevantWidget(context),
           ),
         ),
-        Visibility(
-            visible: kIsWeb,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 50.0),
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    AppIconButton(
-                      backgroundColorDefault: AppColors.lightBackground[700]!,
-                      backgroundColorPressed: AppColors.primaryShadow[200]!,
-                      onPressed: () {
-                        showPopup(context);
-                      },
-                      child: const Icon(
-                        Icons.translate_rounded,
-                        color: Colors.red,
-                      ),
-                    ),
-                    AppIconButton(
-                      backgroundColorDefault: AppColors.lightBackground[700]!,
-                      backgroundColorPressed: AppColors.primaryShadow[200]!,
-                      onPressed: onListenPressed,
-                      child:
-                          const Icon(Icons.headset_rounded, color: Colors.red),
-                    ),
-                    AppIconButton(
-                      backgroundColorDefault: AppColors.lightBackground[700]!,
-                      backgroundColorPressed: AppColors.primaryShadow[200]!,
-                      onPressed: onStartPressed,
-                      child: const Icon(Icons.play_arrow, color: Colors.red),
-                    ),
-                    AppIconButton(
-                      backgroundColorDefault: AppColors.lightBackground[700]!,
-                      backgroundColorPressed: AppColors.primaryShadow[200]!,
-                      onPressed: () {},
-                      child: const Icon(Icons.replay, color: Colors.red),
-                    ),
-                  ]),
-            ))
       ],
     );
   }

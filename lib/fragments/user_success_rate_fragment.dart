@@ -10,13 +10,13 @@ import '../widgets/icon_button.dart';
 class UserFeedbackFragment extends StatelessWidget {
   final UserSuccessRate userSuccessRate;
   final VoidCallback onPressedTranslate;
-  final VoidCallback onPressedListen;
+  final VoidCallback? onPressedListen;
 
   const UserFeedbackFragment(
       {super.key,
       required this.userSuccessRate,
       required this.onPressedTranslate,
-      required this.onPressedListen});
+      this.onPressedListen});
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +33,7 @@ class UserFeedbackFragment extends StatelessWidget {
 
     return Expanded(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Visibility(
             visible: !kIsWeb,
@@ -60,7 +61,7 @@ class UserFeedbackFragment extends StatelessWidget {
                       backgroundColorDefault: AppColors.primaryHighlight[700]!,
                       backgroundColorPressed:
                           Theme.of(context).primaryColorDark,
-                      onPressed: onPressedListen,
+                      onPressed: onPressedListen!,
                       child: const Icon(
                         Icons.headset_rounded,
                         color: AppColors.primaryShadow,
@@ -74,7 +75,9 @@ class UserFeedbackFragment extends StatelessWidget {
           Expanded(
             flex: 4,
             child: Padding(
-              padding: kIsWeb ? const EdgeInsets.fromLTRB(100.0, 100.0, 100.0, 0) : EdgeInsets.zero,
+              padding: kIsWeb
+                  ? const EdgeInsets.fromLTRB(100.0, 100.0, 100.0, 0)
+                  : EdgeInsets.zero,
               child: SfCartesianChart(
                 plotAreaBorderWidth: 0,
                 primaryXAxis: const CategoryAxis(
@@ -89,9 +92,11 @@ class UserFeedbackFragment extends StatelessWidget {
                 series: <CartesianSeries<CategorySuccessRate, String>>[
                   ColumnSeries<CategorySuccessRate, String>(
                     dataSource: userResponse,
-                    xValueMapper: (CategorySuccessRate data, _) => data.category,
+                    xValueMapper: (CategorySuccessRate data, _) =>
+                        data.category,
                     yValueMapper: (CategorySuccessRate data, _) => data.rate,
-                    pointColorMapper: (CategorySuccessRate data, _) => data.color,
+                    pointColorMapper: (CategorySuccessRate data, _) =>
+                        data.color,
                     width: 0.4,
                   ),
                 ],
