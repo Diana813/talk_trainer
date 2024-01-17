@@ -8,6 +8,7 @@ import 'package:talk_trainer/utils/app_colors.dart';
 import 'package:talk_trainer/utils/youtube_search_dummy_data.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../models/time_range.dart';
 import '../../models/timestamps_model.dart';
 import '../../models/user_success_rate.dart';
 import '../../service/backend_api_service.dart';
@@ -30,10 +31,11 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
   late final VideoPlayerController _videoPlayerController;
   late final YoutubePlayerHelper _youtubePlayerHelper;
   late AudioHelper _audioHelper;
-  late Future<List<dynamic>> dataFuture;
+  late Future<List<dynamic>> _dataFuture;
   late List<Timestamp> _pausesTimestamps;
   late String _videoUrl;
   late Uint8List _audioBytes;
+  late TimeRange _timeRange;
 
   bool _isPlayClicked = false;
   bool _isRecording = false;
@@ -41,7 +43,6 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
   bool _isPaused = false;
   bool _isUploaded = false;
 
-  int _pauseTimeIndex = 0;
   int _startVideo = 0;
   int _stopVideo = 0;
 
@@ -56,14 +57,14 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
   void initState() {
     _audioHelper = AudioHelper();
 
-    dataFuture = Future.wait([
+    _dataFuture = Future.wait([
       BackendApiService.backendApiServiceInstance
           .fetchVideoUrl('https://www.youtube.com/watch?v=48jlHaxZnig'),
       BackendApiService.backendApiServiceInstance
           .fetchTimestamps('https://www.youtube.com/watch?v=48jlHaxZnig')
     ]);
 
-    dataFuture.then((results) {
+    _dataFuture.then((results) {
       if (results.isNotEmpty) {
         _videoUrl =
             'http://127.0.0.1:5000/api/video?youtube_url=https://www.youtube.com/watch?v=48jlHaxZnig';
@@ -119,7 +120,6 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
         setState(() {
           _isPlaying = false;
           _isPaused = true;
-          _pauseTimeIndex++;
         });
 
         recordUserAudio();
@@ -195,7 +195,7 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
                   Expanded(
                     flex: 5,
                     child: FutureBuilder<List<dynamic>>(
-                        future: dataFuture,
+                        future: _dataFuture,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -246,7 +246,11 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
 
                                 _isUploaded = await BackendApiService
                                     .backendApiServiceInstance
-                                    .uploadAudio(_audioBytes);
+                                    .uploadAudio(
+                                        _audioBytes,
+                                        TimeRange(
+                                            start: _startVideo / 1000,
+                                            end: _stopVideo / 1000));
 
                                 setState(() {});
 
@@ -254,6 +258,7 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
                                   _userSuccessRate = await BackendApiService
                                       .backendApiServiceInstance
                                       .getSuccessRate();
+                                  print('user success rate: $_userSuccessRate');
                                 }
 
                                 setState(() {});

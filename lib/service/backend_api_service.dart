@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:talk_trainer/models/user_success_rate.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/time_range.dart';
 import '../models/timestamps_model.dart';
 
 class BackendApiService {
@@ -19,23 +20,28 @@ class BackendApiService {
   }
 
   Future<UserSuccessRate> getSuccessRate() async {
-    await Future.delayed(const Duration(seconds: 3));
-    return UserSuccessRate(
-      wordsAccuracy: 0.78,
-      accentAccuracy: 0.59,
-      intonationAccuracy: 0.9,
-      pronunciationAccuracy: 0.8,
-    );
+    Uri url = Uri.parse('http://127.0.0.1:5000/api/get_user_success_rate');
+    var response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      print('response: ${response.body}');
+      return UserSuccessRate.fromJson(json.decode(response.body));
+    } else {
+      throw Exception(
+          'Failed to load user success rate: ${response.statusCode}');
+    }
   }
 
-  Future<bool> uploadAudio(Uint8List bytes) async {
+  Future<bool> uploadAudio(Uint8List bytes, TimeRange timeRange) async {
     const url = 'http://127.0.0.1:5000/api/upload_audio';
+    var timeRangeJson = json.encode(timeRange.toJson());
 
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/octet-stream'},
-      body: bytes,
-    );
+    var request = http.MultipartRequest('POST', Uri.parse(url))
+      ..files.add(http.MultipartFile.fromBytes('audio', bytes,
+          filename: 'user_audio.wav'))
+      ..fields['timeRange'] = timeRangeJson;
+
+    var response = await request.send();
 
     if (response.statusCode == 200) {
       return true;
