@@ -6,10 +6,11 @@ import 'package:talk_trainer/widgets/translation_pop_up.dart';
 import 'package:talk_trainer/fragments/user_recording_fragment.dart';
 import 'package:talk_trainer/fragments/user_success_rate_fragment.dart';
 import 'package:talk_trainer/widgets/youtube_player.dart';
+import 'package:video_player/video_player.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 class LessonFragment extends StatelessWidget {
-  final YoutubePlayerController youtubePlayerController;
+  final VideoPlayerController controller;
   final bool jumpingDotsVisible;
   final bool userSuccessRateVisualizationVisible;
   final bool isPlayClicked;
@@ -20,7 +21,7 @@ class LessonFragment extends StatelessWidget {
 
   const LessonFragment(
       {super.key,
-      required this.youtubePlayerController,
+      required this.controller,
       required this.jumpingDotsVisible,
       required this.userSuccessRateVisualizationVisible,
       required this.isPlayClicked,
@@ -59,8 +60,7 @@ class LessonFragment extends StatelessWidget {
       children: [
         Expanded(
           flex: 2,
-          child: AppYouTubePlayer(
-              youtubePlayerController: youtubePlayerController),
+          child: AppYouTubePlayer(controller: controller),
         ),
         Expanded(
           flex: 3,

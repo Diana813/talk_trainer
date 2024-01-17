@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+import 'package:talk_trainer/utils/app_colors.dart';
+import 'package:video_player/video_player.dart';
 
 class AppYouTubePlayer extends StatelessWidget {
-  final YoutubePlayerController youtubePlayerController;
+  //final YoutubePlayerController youtubePlayerController;
+  final VideoPlayerController controller;
 
-  const AppYouTubePlayer({super.key, required this.youtubePlayerController});
+  const AppYouTubePlayer({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +16,16 @@ class AppYouTubePlayer extends StatelessWidget {
         children: [
           Expanded(
             child: Container(
+              color: Colors.black87,
               padding: const EdgeInsets.symmetric(
                 vertical: 16,
               ),
-              child: YoutubePlayer(
-                controller: youtubePlayerController,
-              ),
+              child: controller.value.isInitialized
+                  ? AspectRatio(
+                      aspectRatio: controller.value.aspectRatio,
+                      child: VideoPlayer(controller),
+                    )
+                  : Container(),
             ),
           ),
         ],

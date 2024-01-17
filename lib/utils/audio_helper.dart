@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,13 +20,18 @@ class AudioHelper {
     return File('$path/recording.acc');
   }
 
-  Future<void> record() async {
+  Future<Stream<Uint8List>> record() async {
     if (await _recorder.hasPermission()) {
-      final file = await _localFile;
-      await _recorder.start(
-        const RecordConfig(encoder: AudioEncoder.aacEld),
-        path: file.path,
-      );
+      try {
+        final stream = await _recorder
+            .startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
+        return stream;
+      } catch (e) {
+        print(e);
+        throw Exception(e);
+      }
+    } else {
+      throw Exception('No permission to record audio');
     }
   }
 
@@ -33,10 +39,8 @@ class AudioHelper {
     await _recorder.stop();
   }
 
-  Future<void> play() async {
-    final file = await _localFile;
-    await _player.setVolume(100);
-    await _player.setFilePath(file.path);
+  Future<void> play(String url) async {
+    await _player.setUrl(url);
     await _player.play();
   }
 

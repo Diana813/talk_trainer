@@ -31,80 +31,79 @@ class UserFeedbackFragment extends StatelessWidget {
           AppColors.successRateChartOrange),
     ];
 
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Visibility(
-            visible: !kIsWeb,
-            child: Expanded(
-              flex: 1,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 16.0, 0.0, 16.0),
-                    child: AppIconButton(
-                      backgroundColorDefault: AppColors.primaryHighlight[700]!,
-                      backgroundColorPressed:
-                          Theme.of(context).primaryColorDark,
-                      onPressed: onPressedTranslate,
-                      child: const Icon(
-                        Icons.translate_rounded,
-                        color: AppColors.primaryShadow,
-                      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Visibility(
+          visible: !kIsWeb,
+          child: Expanded(
+            flex: 1,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 0.0, 16.0),
+                  child: AppIconButton(
+                    backgroundColorDefault: AppColors.primaryHighlight[700]!,
+                    backgroundColorPressed:
+                        Theme.of(context).primaryColorDark,
+                    onPressed: onPressedTranslate,
+                    child: const Icon(
+                      Icons.translate_rounded,
+                      color: AppColors.primaryShadow,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: AppIconButton(
-                      backgroundColorDefault: AppColors.primaryHighlight[700]!,
-                      backgroundColorPressed:
-                          Theme.of(context).primaryColorDark,
-                      onPressed: onPressedListen!,
-                      child: const Icon(
-                        Icons.headset_rounded,
-                        color: AppColors.primaryShadow,
-                      ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: AppIconButton(
+                    backgroundColorDefault: AppColors.primaryHighlight[700]!,
+                    backgroundColorPressed:
+                        Theme.of(context).primaryColorDark,
+                    onPressed: onPressedListen!,
+                    child: const Icon(
+                      Icons.headset_rounded,
+                      color: AppColors.primaryShadow,
                     ),
-                  )
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 4,
-            child: Padding(
-              padding: kIsWeb
-                  ? const EdgeInsets.fromLTRB(100.0, 100.0, 100.0, 0)
-                  : EdgeInsets.zero,
-              child: SfCartesianChart(
-                plotAreaBorderWidth: 0,
-                primaryXAxis: const CategoryAxis(
-                  majorGridLines: MajorGridLines(width: 0),
-                ),
-                primaryYAxis: NumericAxis(
-                  numberFormat: NumberFormat.percentPattern(),
-                  minimum: 0,
-                  maximum: 1,
-                  majorGridLines: const MajorGridLines(width: 0),
-                ),
-                series: <CartesianSeries<CategorySuccessRate, String>>[
-                  ColumnSeries<CategorySuccessRate, String>(
-                    dataSource: userResponse,
-                    xValueMapper: (CategorySuccessRate data, _) =>
-                        data.category,
-                    yValueMapper: (CategorySuccessRate data, _) => data.rate,
-                    pointColorMapper: (CategorySuccessRate data, _) =>
-                        data.color,
-                    width: 0.4,
                   ),
-                ],
-              ),
+                )
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+        Expanded(
+          flex: 4,
+          child: Padding(
+            padding: kIsWeb
+                ? const EdgeInsets.fromLTRB(100.0, 100.0, 100.0, 0)
+                : EdgeInsets.zero,
+            child: SfCartesianChart(
+              plotAreaBorderWidth: 0,
+              primaryXAxis: const CategoryAxis(
+                majorGridLines: MajorGridLines(width: 0),
+              ),
+              primaryYAxis: NumericAxis(
+                numberFormat: NumberFormat.percentPattern(),
+                minimum: 0,
+                maximum: 1,
+                majorGridLines: const MajorGridLines(width: 0),
+              ),
+              series: <CartesianSeries<CategorySuccessRate, String>>[
+                ColumnSeries<CategorySuccessRate, String>(
+                  dataSource: userResponse,
+                  xValueMapper: (CategorySuccessRate data, _) =>
+                      data.category,
+                  yValueMapper: (CategorySuccessRate data, _) => data.rate,
+                  pointColorMapper: (CategorySuccessRate data, _) =>
+                      data.color,
+                  width: 0.4,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

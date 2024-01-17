@@ -31,8 +31,9 @@ class YouTubeApiService {
     try {
       final response = await http.get(uri);
 
+      print(response.body);
+
       if (response.statusCode == 200) {
-        print(response.body);
         Map<String, dynamic> data = json.decode(response.body);
 
         if (data.containsKey('items')) {
@@ -44,7 +45,6 @@ class YouTubeApiService {
           }
 
           nextPageToken = data['nextPageToken'];
-
           return videos;
         } else {
           throw 'Brak pola "items" w odpowiedzi z YouTube API.';

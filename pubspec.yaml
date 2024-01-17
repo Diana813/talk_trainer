@@ -40,6 +40,8 @@ dependencies:
   just_audio: ^0.9.36
   intl: ^0.18.0
   path_provider: ^2.0.14
+  video_player: ^2.8.2
+
 
 
 dev_dependencies:

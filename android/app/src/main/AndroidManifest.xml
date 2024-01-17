@@ -6,7 +6,8 @@
         android:label="talk_trainer"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_config">
 
         <activity
             android:name=".MainActivity"
