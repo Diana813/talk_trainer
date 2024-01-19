@@ -1,13 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:talk_trainer/models/user_success_rate.dart';
 import 'package:talk_trainer/fragments/start_fragment.dart';
-import 'package:talk_trainer/widgets/translation_pop_up.dart';
 import 'package:talk_trainer/fragments/user_recording_fragment.dart';
 import 'package:talk_trainer/fragments/user_success_rate_fragment.dart';
+import 'package:talk_trainer/models/user_success_rate.dart';
+import 'package:talk_trainer/widgets/text_popup.dart';
 import 'package:talk_trainer/widgets/youtube_player.dart';
 import 'package:video_player/video_player.dart';
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 class LessonFragment extends StatelessWidget {
   final VideoPlayerController controller;
@@ -17,7 +15,9 @@ class LessonFragment extends StatelessWidget {
   final VoidCallback onStartPressed;
   final VoidCallback onUserRecordingSubmitPressed;
   final VoidCallback? onListenPressed;
+  final VoidCallback onTranslatePressed;
   final UserSuccessRate userSuccessRate;
+  final bool isUploaded;
 
   const LessonFragment(
       {super.key,
@@ -27,7 +27,9 @@ class LessonFragment extends StatelessWidget {
       required this.isPlayClicked,
       required this.onStartPressed,
       required this.onUserRecordingSubmitPressed,
+      required this.onTranslatePressed,
       required this.userSuccessRate,
+      required this.isUploaded,
       this.onListenPressed});
 
   Widget _returnRelevantWidget(BuildContext context) {
@@ -39,9 +41,8 @@ class LessonFragment extends StatelessWidget {
       return UserFeedbackFragment(
         userSuccessRate: userSuccessRate,
         onPressedListen: onListenPressed,
-        onPressedTranslate: () {
-          showPopup(context);
-        },
+        isUploaded: isUploaded,
+        onPressedTranslate: onTranslatePressed,
       );
     } else {
       return StartButtonFragment(

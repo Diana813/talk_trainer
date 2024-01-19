@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 
 import '../utils/app_colors.dart';
 import '../widgets/icon_button.dart';
-import '../widgets/translation_pop_up.dart';
+import '../widgets/text_popup.dart';
 
 class WebBottomNavigationFragment extends StatelessWidget {
   final VoidCallback onListenPressed;
   final VoidCallback onStartPressed;
   final VoidCallback onReplyPressed;
+  final VoidCallback onTranslationPressed;
 
   const WebBottomNavigationFragment(
       {super.key,
       required this.onListenPressed,
       required this.onStartPressed,
-      required this.onReplyPressed});
+      required this.onReplyPressed,
+      required this.onTranslationPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +28,7 @@ class WebBottomNavigationFragment extends StatelessWidget {
             AppIconButton(
               backgroundColorDefault: AppColors.lightBackground[700]!,
               backgroundColorPressed: AppColors.primaryShadow[200]!,
-              onPressed: () {
-                showPopup(context);
-              },
+              onPressed: onTranslationPressed,
               child: const Icon(
                 Icons.translate_rounded,
                 color: Colors.red,

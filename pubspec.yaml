@@ -43,7 +43,6 @@ dependencies:
   video_player: ^2.8.2
 
 
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -10,7 +10,9 @@ import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 import '../../main.dart';
 import '../../fragments/lesson_fragment.dart';
+import '../../models/intonation.dart';
 import '../../models/timestamps_model.dart';
+import '../../models/transcription.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/audio_helper.dart';
 
@@ -46,8 +48,13 @@ class _AndroidLessonScreenState extends State<AndroidLessonScreen> {
 
   UserSuccessRate _userSuccessRate = UserSuccessRate(
     wordsAccuracy: 0,
+    transcription: Transcription(
+      lectorTranscription: '',
+      userTranscription: '',
+    ),
     accentAccuracy: 0,
     intonationAccuracy: 0,
+    intonation: Intonation(lectorIntonation: [], userIntonation: []),
     pronunciationAccuracy: 0,
   );
 
@@ -123,7 +130,6 @@ class _AndroidLessonScreenState extends State<AndroidLessonScreen> {
     }
 
     setState(() {
-      print('startVideo: $_startVideo');
       _isPlaying = true;
       _isPaused = false;
     });
@@ -230,6 +236,7 @@ class _AndroidLessonScreenState extends State<AndroidLessonScreen> {
                     .fetchUserAudioUrl();
                 _audioHelper.play(_userAudioUrl);
               },
+              isUploaded: false, onTranslatePressed: () {  }, //todo
             );
           }
         },

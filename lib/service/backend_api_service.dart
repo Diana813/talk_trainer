@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:talk_trainer/models/user_success_rate.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/intonation.dart';
 import '../models/time_range.dart';
 import '../models/timestamps_model.dart';
 
@@ -24,8 +25,19 @@ class BackendApiService {
     var response = await http.get(url);
 
     if (response.statusCode == 200) {
-      print('response: ${response.body}');
       return UserSuccessRate.fromJson(json.decode(response.body));
+    } else {
+      throw Exception(
+          'Failed to load user success rate: ${response.statusCode}');
+    }
+  }
+
+  Future<Intonation> getIntonationData() async {
+    Uri url = Uri.parse('http://127.0.0.1:5000/api/get_intonation_data');
+    var response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      return Intonation.fromJson(json.decode(response.body));
     } else {
       throw Exception(
           'Failed to load user success rate: ${response.statusCode}');

@@ -19,7 +19,7 @@ class YouTubeApiService {
 
     Map<String, String> parameters = {
       'q': keywords,
-      'key': YOUTUBE_API_KEY,
+      'key': GOOGLE_API_KEY,
       'pageToken': nextPageToken,
       'maxResults': '25',
       'type': 'video',
@@ -66,7 +66,7 @@ class YouTubeApiService {
 
     Map<String, String> parameters = {
       'q': 'podcast',
-      'key': YOUTUBE_API_KEY,
+      'key': GOOGLE_API_KEY,
       'maxResults': '8',
       'type': 'video',
       'part': 'snippet',

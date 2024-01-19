@@ -8,14 +8,18 @@ import 'package:talk_trainer/utils/app_colors.dart';
 import 'package:talk_trainer/utils/youtube_search_dummy_data.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../models/intonation.dart';
 import '../../models/time_range.dart';
 import '../../models/timestamps_model.dart';
+import '../../models/transcription.dart';
 import '../../models/user_success_rate.dart';
 import '../../service/backend_api_service.dart';
+import '../../service/google_translate_api_service.dart';
 import '../../service/youtube_api_service.dart';
 import '../../utils/audio_helper.dart';
 import '../../utils/youtube_helper.dart';
 import '../../widgets/search_results_widget.dart';
+import '../../widgets/text_popup.dart';
 
 class WebLearningScreen extends StatefulWidget {
   final String keywords;
@@ -30,12 +34,12 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
   late Future<List<SearchResult>> _videos;
   late final VideoPlayerController _videoPlayerController;
   late final YoutubePlayerHelper _youtubePlayerHelper;
+  late GoogleTranslator _translator;
   late AudioHelper _audioHelper;
   late Future<List<dynamic>> _dataFuture;
   late List<Timestamp> _pausesTimestamps;
   late String _videoUrl;
   late Uint8List _audioBytes;
-  late TimeRange _timeRange;
 
   bool _isPlayClicked = false;
   bool _isRecording = false;
@@ -48,14 +52,20 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
 
   UserSuccessRate _userSuccessRate = UserSuccessRate(
     wordsAccuracy: 0,
+    transcription: Transcription(
+      lectorTranscription: '',
+      userTranscription: '',
+    ),
     accentAccuracy: 0,
     intonationAccuracy: 0,
+    intonation: Intonation(lectorIntonation: [], userIntonation: []),
     pronunciationAccuracy: 0,
   );
 
   @override
   void initState() {
     _audioHelper = AudioHelper();
+    _translator = GoogleTranslator();
 
     _dataFuture = Future.wait([
       BackendApiService.backendApiServiceInstance
@@ -148,7 +158,6 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
     });
 
     await Future.delayed(Duration(milliseconds: _stopVideo - _startVideo));
-    print('start: $_startVideo, stop: $_stopVideo');
 
     await _videoPlayerController.pause();
     setState(() {
@@ -234,6 +243,7 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
                                     !_isPlayClicked) {
                                   setState(() {
                                     _isPlayClicked = true;
+                                    _isUploaded = false;
                                   });
                                   playVideoSegment();
                                 }
@@ -258,13 +268,26 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
                                   _userSuccessRate = await BackendApiService
                                       .backendApiServiceInstance
                                       .getSuccessRate();
-                                  print('user success rate: $_userSuccessRate');
                                 }
 
                                 setState(() {});
                               },
                               userSuccessRate: _userSuccessRate,
                               onListenPressed: () {},
+                              isUploaded: _isUploaded,
+                              onTranslatePressed: () async {
+                                await _translator
+                                    .translate(_userSuccessRate
+                                        .transcription.lectorTranscription)
+                                    .then((value) {
+                                  showTextPopup(
+                                      context,
+                                      "Tłumaczenie",
+                                      _userSuccessRate
+                                          .transcription.lectorTranscription,
+                                      value);
+                                });
+                              },
                             );
                           }
                         }),
@@ -284,6 +307,7 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
                         if (!_isRecording && !_isPlaying) {
                           setState(() {
                             _isPlayClicked = true;
+                            _isUploaded = false;
                           });
                           playVideoSegment();
                         }
@@ -291,7 +315,21 @@ class _WebLearningScreenState extends State<WebLearningScreen> {
                       onReplyPressed: () {
                         if (!_isRecording && !_isPlaying) {
                           replayVideoSegment();
+                          _isUploaded = false;
                         }
+                      },
+                      onTranslationPressed: () async {
+                        await _translator
+                            .translate(_userSuccessRate
+                                .transcription.lectorTranscription)
+                            .then((value) {
+                          showTextPopup(
+                              context,
+                              "Tłumaczenie",
+                              _userSuccessRate
+                                  .transcription.lectorTranscription,
+                              value);
+                        });
                       },
                     ),
                   )
